@@ -1,0 +1,1 @@
+include ':app', ':map', ':facebookleecher', ':remoteapp', ':accelero', ':bluetooth', ':nfc', ':spinnerapp'

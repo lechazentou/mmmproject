@@ -8,4 +8,10 @@
     <TextView android:text="@string/hello_world" android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
+    <fragment
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:name="fr.istic.lechazentou.fataldestination.spinner.map.MapFragment"
+        android:id="@+id/map_fragment"/>
+
 </RelativeLayout>

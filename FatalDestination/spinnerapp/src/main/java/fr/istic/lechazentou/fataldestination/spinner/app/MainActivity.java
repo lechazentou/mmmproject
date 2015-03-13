@@ -1,5 +1,8 @@
 package fr.istic.lechazentou.fataldestination.spinner.app;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -9,7 +12,7 @@ import android.view.MenuItem;
 import fr.istic.lechazentou.fataldestination.spinner.map.MapFragment;
 
 
-public class MainActivity extends ActionBarActivity implements MapFragment.OnFragmentInteractionListener {
+public class MainActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -17,6 +20,13 @@ public class MainActivity extends ActionBarActivity implements MapFragment.OnFra
         setContentView(R.layout.activity_spinner);
     }
 
+    @Override
+    protected void onResumeFragments() {
+        super.onResumeFragments();
+        //This is an example
+        MapFragment fragment = (MapFragment)getFragmentManager().findFragmentById(R.id.map_fragment);
+        fragment.createMarketWithPerson(48.115472, -1.638398, BitmapFactory.decodeResource(getResources(), R.drawable.macaque), "Jean-Luc");
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -38,10 +48,5 @@ public class MainActivity extends ActionBarActivity implements MapFragment.OnFra
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onFragmentInteraction(Uri uri) {
-        //TODO Implement this method
     }
 }

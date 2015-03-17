@@ -4,5 +4,8 @@
     <string name="app_name">Application</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="killedby">You have been killed by:</string>
+    <string name="discoverable">Ensure discoverable</string>
+    <string name="scan">Scan</string>
 
 </resources>

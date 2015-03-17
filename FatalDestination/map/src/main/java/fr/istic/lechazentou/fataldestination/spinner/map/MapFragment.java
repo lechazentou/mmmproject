@@ -46,7 +46,7 @@ public class MapFragment extends com.google.android.gms.maps.MapFragment {
                 .icon(BitmapDescriptorFactory.fromBitmap(bmp))
                 .anchor(0.5f, 1)
                 .title(text)).showInfoWindow();
-        CameraPosition cameraPosition = new CameraPosition.Builder().target(new LatLng(latitude, longitude)).zoom(14.0f).build();
+        CameraPosition cameraPosition = new CameraPosition.Builder().target(new LatLng(latitude, longitude)).zoom(3.0f).build();
         CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
         getMap().moveCamera(cameraUpdate);
     }

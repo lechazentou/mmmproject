@@ -2,6 +2,7 @@ package fr.istic.lechazentou.fataldestination.remote.app;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
@@ -107,11 +108,11 @@ public class MainActivity extends Activity implements SensorEventListener {
             }
             else if (x < -4 && 8 > y && -5 < z && z < 5 && goodPos){
                 textView.setBackgroundColor(Color.RED);
+                sendSignal();
             }
             else if (-5 > z || z > 5 || x >2){
                 textView.setBackgroundColor(Color.WHITE);
                 goodPos = false;
-                sendSignal();
             }
 
             textView.setText(txt);
@@ -124,6 +125,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 
     private void sendSignal(){
         // TODO
+        handler.sendEmptyMessage(ACTION_SEND);
     }
 
     @Override
@@ -155,6 +157,13 @@ public class MainActivity extends Activity implements SensorEventListener {
             case REQUEST_CONNECT_DEVICE:
                 if (resultCode == Activity.RESULT_OK){
                     String address = intent.getExtras().getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
+                    BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
+                    bluetoothService.connect(device);
+                }
+                break;
+            case REQUEST_ENABLE_BT:
+                if (resultCode == Activity.RESULT_OK){
+                    bluetoothService = new BluetoothService(this, handler);
                 }
         }
     }

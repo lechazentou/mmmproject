@@ -29,6 +29,8 @@ public class BluetoothService {
     public static final int STATE_CONNECTING = 2;
     public static final int STATE_CONNECTED = 3;
 
+    private static final int ACTION_SEND = 1;
+
     private BluetoothAdapter bluetoothAdapter;
     private Handler handler;
     private int state;
@@ -90,7 +92,7 @@ public class BluetoothService {
         connectedThread.start();
 
         //Message msg = handler.obtainMessage(BluetoothChat.MESSAGE_DEVICE_NAME);
-        Bundle bundle = new Bundle();
+        //Bundle bundle = new Bundle();
         //bundle.putString(BluetoothChat.DEVICE_NAME, device.getName());
         //msg.setData(bundle);
         //handler.sendMessage(msg);
@@ -107,7 +109,7 @@ public class BluetoothService {
     private void connectionFailed() {
         setState(STATE_LISTEN);
         //Message msg = handler.obtainMessage(BluetoothChat.MESSAGE_TOAST);
-        Bundle bundle = new Bundle();
+        //Bundle bundle = new Bundle();
         //bundle.putString(BluetoothChat.TOAST, "Unable to connect device");
         //msg.setData(bundle);
         //handler.sendMessage(msg);
@@ -116,7 +118,7 @@ public class BluetoothService {
     private void connectionLost() {
         setState(STATE_LISTEN);
         //Message msg = handler.obtainMessage(BluetoothChat.MESSAGE_TOAST);
-        Bundle bundle = new Bundle();
+        //Bundle bundle = new Bundle();
         //bundle.putString(BluetoothChat.TOAST, "Device connection was lost");
         //msg.setData(bundle);
         //handler.sendMessage(msg);
@@ -230,54 +232,23 @@ public class BluetoothService {
 
     private class ConnectedThread extends Thread {
         private final BluetoothSocket socket;
-        private final InputStream inStream;
-        private final OutputStream outStream;
 
         public ConnectedThread(BluetoothSocket socket) {
-
             this.socket = socket;
-            InputStream tmpIn = null;
-            OutputStream tmpOut = null;
-            try {
-                tmpIn = socket.getInputStream();
-                tmpOut = socket.getOutputStream();
-            } catch (IOException e) {
-                Log.e(TAG, "temp sockets not created", e);
-            }
-            inStream = tmpIn;
-            outStream = tmpOut;
         }
 
         public void run() {
-
-            byte[] buffer = new byte[1024];
-            int bytes;
             while (true) {
-                try {
-                    bytes = inStream.read(buffer);
-                    /*handler.obtainMessage(BluetoothChat.MESSAGE_READ, bytes, -1, buffer)
-                            .sendToTarget();*/
-                } catch (IOException e) {
-                    Log.e(TAG, "disconnected", e);
-                    connectionLost();
-                    break;
-                }
-            }
-        }
-        /**
-         * Write to the connected OutStream.
-         * @param buffer  The bytes to write
-         */
-        public void write(byte[] buffer) {
-            try {
-                outStream.write(buffer);
-                /*handler.obtainMessage(BluetoothChat.MESSAGE_WRITE, -1, -1, buffer)
+                handler.obtainMessage(ACTION_SEND)
                         .sendToTarget();
-                        */
-            } catch (IOException e) {
-                Log.e(TAG, "Exception during write", e);
             }
         }
+
+        public void send() {
+                handler.obtainMessage(ACTION_SEND)
+                        .sendToTarget();
+        }
+
         public void cancel() {
             try {
                 socket.close();

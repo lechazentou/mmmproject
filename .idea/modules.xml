@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/FatalDestination/remoteapp/src/main/main.iml" filepath="$PROJECT_DIR$/FatalDestination/remoteapp/src/main/main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/FatalDestination/facebookleecher/src/main/main1.iml" filepath="$PROJECT_DIR$/FatalDestination/facebookleecher/src/main/main1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/FatalDestination/accelero/src/main/main2.iml" filepath="$PROJECT_DIR$/FatalDestination/accelero/src/main/main2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/FatalDestination/bluetooth/src/main/main3.iml" filepath="$PROJECT_DIR$/FatalDestination/bluetooth/src/main/main3.iml" />
+      <module fileurl="file://$PROJECT_DIR$/FatalDestination/spinnerapp/src/main/main4.iml" filepath="$PROJECT_DIR$/FatalDestination/spinnerapp/src/main/main4.iml" />
+      <module fileurl="file://$PROJECT_DIR$/FatalDestination/map/src/main/main5.iml" filepath="$PROJECT_DIR$/FatalDestination/map/src/main/main5.iml" />
+      <module fileurl="file://$PROJECT_DIR$/FatalDestination/nfc/src/main/main6.iml" filepath="$PROJECT_DIR$/FatalDestination/nfc/src/main/main6.iml" />
+      <module fileurl="file://$PROJECT_DIR$/FatalDestination/app/src/main/main7.iml" filepath="$PROJECT_DIR$/FatalDestination/app/src/main/main7.iml" />
+    </modules>
+  </component>
+</project>
+

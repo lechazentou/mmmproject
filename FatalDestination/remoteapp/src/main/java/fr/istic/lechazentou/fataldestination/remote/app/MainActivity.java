@@ -49,6 +49,10 @@ public class MainActivity extends Activity implements SensorEventListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_remote);
+        textView = (TextView) findViewById(R.id.textViewInfo);
+        badPosition();
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        lastUpdate = System.currentTimeMillis();
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null){
             Toast.makeText(this, "Bluetooth is not available", Toast.LENGTH_LONG).show();
@@ -103,8 +107,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 
             if (-2 < x && x < 3 && 8 < y && -5 < z && z < 5){
-                textView.setBackgroundColor(Color.BLUE);
-                goodPos = true;
+                goodPosition();
             }
             else if (x < -4 && 8 > y && -5 < z && z < 5 && goodPos){
                 textView.setBackgroundColor(Color.RED);
@@ -113,9 +116,13 @@ public class MainActivity extends Activity implements SensorEventListener {
             else if (-5 > z || z > 5 || x >2){
                 textView.setBackgroundColor(Color.WHITE);
                 goodPos = false;
+                sendSignal();
+            }
+            else if (-5 > z || z > 5 || x >2){
+                badPosition();
             }
 
-            textView.setText(txt);
+            //textView.setText(txt);
 
             last_x = x;
             last_y = y;
@@ -123,10 +130,27 @@ public class MainActivity extends Activity implements SensorEventListener {
         }
     }
 
+    private void goodPosition(){
+        String txt = "GOOD ! LET'S GO !";
+        textView.setText(txt);
+        textView.setBackgroundColor(Color.BLUE);
+        goodPos = true;
+    }
+
+    private void badPosition(){
+        String txt = "Put the device in good position";
+        textView.setText(txt);
+        textView.setBackgroundColor(Color.WHITE);
+        goodPos = false;
+    }
     private void sendSignal(){
         // TODO
         handler.sendEmptyMessage(ACTION_SEND);
+        textView.setBackgroundColor(Color.RED);
     }
+
+
+
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {

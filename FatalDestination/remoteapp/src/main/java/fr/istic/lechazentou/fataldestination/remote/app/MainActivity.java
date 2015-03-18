@@ -78,7 +78,6 @@ public class MainActivity extends Activity implements SensorEventListener {
             getAccelerometer(event);
         }
         textView = (TextView) findViewById(R.id.textViewInfo);
-
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         lastUpdate = System.currentTimeMillis();
     }
@@ -91,7 +90,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 
         long curTime = System.currentTimeMillis();
 
-        if ((curTime - lastUpdate) > 1500) {
+        if ((curTime - lastUpdate) > 200) {
             long diffTime = (curTime - lastUpdate);
             lastUpdate = curTime;
 
@@ -110,19 +109,13 @@ public class MainActivity extends Activity implements SensorEventListener {
                 goodPosition();
             }
             else if (x < -4 && 8 > y && -5 < z && z < 5 && goodPos){
-                textView.setBackgroundColor(Color.RED);
-                sendSignal();
-            }
-            else if (-5 > z || z > 5 || x >2){
-                textView.setBackgroundColor(Color.WHITE);
-                goodPos = false;
                 sendSignal();
             }
             else if (-5 > z || z > 5 || x >2){
                 badPosition();
             }
 
-            //textView.setText(txt);
+            textView.setText(txt);
 
             last_x = x;
             last_y = y;

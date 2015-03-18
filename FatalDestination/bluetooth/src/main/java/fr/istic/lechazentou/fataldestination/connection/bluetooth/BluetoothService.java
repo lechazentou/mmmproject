@@ -132,7 +132,8 @@ public class BluetoothService {
             BluetoothServerSocket tmp = null;
 
             try {
-                tmp = bluetoothAdapter.listenUsingRfcommWithServiceRecord(NAME, MY_UUID);
+                //tmp = bluetoothAdapter.listenUsingRfcommWithServiceRecord(NAME, MY_UUID);
+                tmp = bluetoothAdapter.listenUsingInsecureRfcommWithServiceRecord(NAME, MY_UUID);
             } catch (IOException e){
                 Log.e(TAG, "listen failed", e);
             }

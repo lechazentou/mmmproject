@@ -24,7 +24,7 @@ import fr.istic.lechazentou.fataldestination.connection.bluetooth.DeviceListActi
 import android.widget.TextView;
 
 
-public class MainActivity extends Activity implements SensorEventListener {
+public class MainActivity extends ActionBarActivity implements SensorEventListener {
     private SensorManager sensorManager;
     private boolean goodPos = false;
     private TextView textView;
@@ -193,6 +193,13 @@ public class MainActivity extends Activity implements SensorEventListener {
                     bluetoothService = new BluetoothService(this, handler);
                 }
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_remote, menu);
+        return true;
     }
 
     @Override

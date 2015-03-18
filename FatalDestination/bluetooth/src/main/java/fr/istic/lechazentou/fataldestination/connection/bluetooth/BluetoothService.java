@@ -143,30 +143,30 @@ public class BluetoothService {
             setName("AcceptThread");
             BluetoothSocket socket = null;
 
-            while (state != STATE_CONNECTED){
+            while (state != STATE_CONNECTED) {
                 try {
                     socket = serverSocket.accept();
-                }catch (IOException e){
+                } catch (IOException e) {
                     Log.e(TAG, "accept() failed", e);
                     break;
                 }
-            }
 
-            if (socket != null){
-                synchronized (BluetoothService.this){
-                    switch (state){
-                        case STATE_LISTEN:
-                        case STATE_CONNECTING:
-                            connected(socket, socket.getRemoteDevice());
-                            break;
-                        case STATE_NONE:
-                        case STATE_CONNECTED:
-                            try {
-                                socket.close();
-                            } catch (IOException e){
-                                Log.e(TAG, "Could not close socket", e);
-                            }
-                            break;
+                if (socket != null) {
+                    synchronized (BluetoothService.this) {
+                        switch (state) {
+                            case STATE_LISTEN:
+                            case STATE_CONNECTING:
+                                connected(socket, socket.getRemoteDevice());
+                                break;
+                            case STATE_NONE:
+                            case STATE_CONNECTED:
+                                try {
+                                    socket.close();
+                                } catch (IOException e) {
+                                    Log.e(TAG, "Could not close socket", e);
+                                }
+                                break;
+                        }
                     }
                 }
             }

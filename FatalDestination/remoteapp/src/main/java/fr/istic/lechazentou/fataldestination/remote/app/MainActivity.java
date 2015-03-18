@@ -196,6 +196,31 @@ public class MainActivity extends Activity implements SensorEventListener {
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == R.id.scan){
+            // Launch the DeviceListActivity to see devices and do scan
+            Intent serverIntent = new Intent(this, DeviceListActivity.class);
+            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+            return true;
+        }
+        else if(item.getItemId() == R.id.discoverable) {
+            // Ensure this device is discoverable by others
+            ensureDiscoverable();
+            return true;
+        }
+        return false;
+    }
+
+    private void ensureDiscoverable() {
+        if (bluetoothAdapter.getScanMode() !=
+                BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
+            Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+            startActivity(discoverableIntent);
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         // Stop the Bluetooth chat services

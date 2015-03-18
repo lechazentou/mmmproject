@@ -230,6 +230,15 @@ public class BluetoothService {
 
     }
 
+    public void send(){
+        ConnectedThread connectedThread1;
+        synchronized (this) {
+            if (state != STATE_CONNECTED)return;
+            connectedThread1 = connectedThread;
+        }
+        connectedThread1.send();
+    }
+
     private class ConnectedThread extends Thread {
         private final BluetoothSocket socket;
 
@@ -245,8 +254,7 @@ public class BluetoothService {
         }
 
         public void send() {
-                handler.obtainMessage(ACTION_SEND)
-                        .sendToTarget();
+                handler.sendEmptyMessage(ACTION_SEND);
         }
 
         public void cancel() {

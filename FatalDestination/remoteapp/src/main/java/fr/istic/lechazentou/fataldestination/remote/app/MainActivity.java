@@ -37,7 +37,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 
     private static final String TAG = "RemoteApp";
 
-    private static final int ACTION_SEND = 1;
+    //Must be th same value than MESSAGE_READ in SpinnerActivity
+    private static final int ACTION_SEND = 2;
 
     private static final int REQUEST_CONNECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;

@@ -56,6 +56,8 @@ public class MainActivity extends Activity implements SensorEventListener {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null){
             Toast.makeText(this, "Bluetooth is not available", Toast.LENGTH_LONG).show();
+            finish();
+            return;
         }
     }
 
@@ -165,6 +167,13 @@ public class MainActivity extends Activity implements SensorEventListener {
         sensorManager.registerListener(this,
                 sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
                 SensorManager.SENSOR_DELAY_NORMAL);
+        if (bluetoothService != null) {
+            // Only if the state is STATE_NONE, do we know that we haven't started already
+            if (bluetoothService.getState() == BluetoothService.STATE_NONE) {
+                // Start the Bluetooth chat services
+                bluetoothService.start();
+            }
+        }
     }
 
     @Override
@@ -190,6 +199,13 @@ public class MainActivity extends Activity implements SensorEventListener {
                     bluetoothService = new BluetoothService(this, handler);
                 }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Stop the Bluetooth chat services
+        if (bluetoothService != null) bluetoothService.stop();
     }
 }
 

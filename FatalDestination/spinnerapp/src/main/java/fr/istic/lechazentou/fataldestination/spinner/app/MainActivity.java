@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,7 +27,7 @@ import fr.istic.lechazentou.fataldestination.connection.bluetooth.DeviceListActi
 import fr.istic.lechazentou.fataldestination.spinner.map.MapFragment;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends FragmentActivity {
 
     // Message types sent from the BluetoothChatService Handler
     public static final int MESSAGE_STATE_CHANGE = 1;
@@ -117,7 +118,7 @@ public class MainActivity extends ActionBarActivity {
             startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
         // Otherwise, setup the chat session
         } else {
-            if (mBluetoothAdapter == null) mBluetoothService = new BluetoothService(this, mHandler);
+            if (mBluetoothService == null) mBluetoothService = new BluetoothService(this, mHandler);
         }
     }
 

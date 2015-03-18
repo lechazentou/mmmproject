@@ -117,7 +117,7 @@ public class MainActivity extends Activity implements SensorEventListener {
                 badPosition();
             }
 
-            textView.setText(txt);
+            //textView.setText(txt);
 
             last_x = x;
             last_y = y;

@@ -156,6 +156,7 @@ public class BluetoothService {
                         switch (state) {
                             case STATE_LISTEN:
                             case STATE_CONNECTING:
+                                Log.i(TAG,"STATE CONNECTING");
                                 connected(socket, socket.getRemoteDevice());
                                 break;
                             case STATE_NONE:

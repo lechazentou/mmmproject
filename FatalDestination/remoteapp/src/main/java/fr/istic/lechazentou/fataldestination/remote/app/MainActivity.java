@@ -141,7 +141,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     }
     private void sendSignal(){
         // TODO
-        handler.sendEmptyMessage(ACTION_SEND);
+        bluetoothService.send();
         textView.setBackgroundColor(Color.RED);
     }
 

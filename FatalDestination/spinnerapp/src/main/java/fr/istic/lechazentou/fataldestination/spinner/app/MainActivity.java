@@ -61,6 +61,8 @@ public class MainActivity extends ActionBarActivity {
             finish();
             return;
         }
+        DatePicker datePicker = (DatePicker)findViewById(R.id.date_picker);
+        datePicker.setEnabled(false);
     }
 
     private void ensureDiscoverable() {

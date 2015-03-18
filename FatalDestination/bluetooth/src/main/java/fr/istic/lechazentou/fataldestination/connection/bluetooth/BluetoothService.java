@@ -13,6 +13,8 @@ import android.util.Log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.UUID;
 
 /**
@@ -132,10 +134,15 @@ public class BluetoothService {
             BluetoothServerSocket tmp = null;
 
             try {
+                Method m = bluetoothAdapter.getClass().getMethod("listenUsingRfcommOn", new Class[] {int.class});
+                tmp = (BluetoothServerSocket) m.invoke(bluetoothAdapter, MY_UUID);
                 //tmp = bluetoothAdapter.listenUsingRfcommWithServiceRecord(NAME, MY_UUID);
-                tmp = bluetoothAdapter.listenUsingInsecureRfcommWithServiceRecord(NAME, MY_UUID);
-            } catch (IOException e){
-                Log.e(TAG, "listen failed", e);
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
             }
             serverSocket = tmp;
         }

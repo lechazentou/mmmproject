@@ -27,7 +27,7 @@ import fr.istic.lechazentou.fataldestination.connection.bluetooth.DeviceListActi
 import fr.istic.lechazentou.fataldestination.spinner.map.MapFragment;
 
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends ActionBarActivity {
 
     // Message types sent from the BluetoothChatService Handler
     public static final int MESSAGE_STATE_CHANGE = 1;

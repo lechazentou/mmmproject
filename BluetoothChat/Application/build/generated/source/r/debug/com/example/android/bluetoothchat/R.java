@@ -270,38 +270,39 @@ containing a value of this type.
     public static final class drawable {
         public static final int ic_action_device_access_bluetooth_searching=0x7f020000;
         public static final int ic_launcher=0x7f020001;
-        public static final int tile=0x7f020002;
+        public static final int lever=0x7f020002;
+        public static final int tile=0x7f020003;
     }
     public static final class id {
         public static final int alignBounds=0x7f090002;
         public static final int alignMargins=0x7f090003;
         public static final int bottom=0x7f090004;
         public static final int button_scan=0x7f090016;
-        public static final int button_send=0x7f09001c;
         public static final int center=0x7f090005;
         public static final int center_horizontal=0x7f090006;
         public static final int center_vertical=0x7f090007;
         public static final int clip_horizontal=0x7f090008;
         public static final int clip_vertical=0x7f090009;
-        public static final int discoverable=0x7f09001f;
+        public static final int discoverable=0x7f090020;
         public static final int end=0x7f09000a;
         public static final int fill=0x7f09000b;
         public static final int fill_horizontal=0x7f09000c;
         public static final int fill_vertical=0x7f09000d;
         public static final int horizontal=0x7f090000;
-        public static final int in=0x7f09001b;
-        public static final int insecure_connect_scan=0x7f09001e;
+        public static final int imageView=0x7f09001c;
+        public static final int in=0x7f09001d;
+        public static final int insecure_connect_scan=0x7f09001f;
         public static final int left=0x7f09000e;
-        public static final int log_fragment=0x7f090019;
-        public static final int menu_toggle_log=0x7f090020;
+        public static final int log_fragment=0x7f09001a;
         public static final int new_devices=0x7f090015;
         public static final int paired_devices=0x7f090013;
         public static final int right=0x7f09000f;
-        public static final int sample_content_fragment=0x7f09001a;
+        public static final int sample_content_fragment=0x7f090018;
         public static final int sample_main_layout=0x7f090017;
-        public static final int sample_output=0x7f090018;
-        public static final int secure_connect_scan=0x7f09001d;
+        public static final int sample_output=0x7f090019;
+        public static final int secure_connect_scan=0x7f09001e;
         public static final int start=0x7f090010;
+        public static final int textViewInfo=0x7f09001b;
         public static final int title_new_devices=0x7f090014;
         public static final int title_paired_devices=0x7f090012;
         public static final int top=0x7f090011;
@@ -316,7 +317,6 @@ containing a value of this type.
     }
     public static final class menu {
         public static final int bluetooth_chat=0x7f080000;
-        public static final int main=0x7f080001;
     }
     public static final class string {
         public static final int app_name=0x7f060000;

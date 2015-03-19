@@ -64,4 +64,4 @@
         android:text="@string/button_scan"
         />
 </LinearLayout>
-<!-- From: file:/Users/flolegazier/AndroidStudioProjects/mmmproject/BluetoothChat/Application/src/main/res/layout/activity_device_list.xml -->
+<!-- From: file:/home/erwann/Documents/Cours/MMM/mmmproject/BluetoothChat/Application/src/main/res/layout/activity_device_list.xml -->

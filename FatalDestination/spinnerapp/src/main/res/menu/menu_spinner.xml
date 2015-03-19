@@ -1,7 +1,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".MainActivity">
-    <item android:id="@+id/scan" android:title="@string/scan"
+    <item android:id="@+id/scan_secure" android:title="@string/scan_secure"
+        android:orderInCategory="100" app:showAsAction="ifRoom" android:icon="@android:drawable/ic_menu_rotate"/>
+    <item android:id="@+id/scan_insecure" android:title="@string/scan_insecure"
         android:orderInCategory="100" app:showAsAction="ifRoom" android:icon="@android:drawable/ic_menu_rotate"/>
     <item android:id="@+id/discoverable" android:title="@string/discoverable"
         android:orderInCategory="100" app:showAsAction="ifRoom" android:icon="@android:drawable/ic_menu_view"/>

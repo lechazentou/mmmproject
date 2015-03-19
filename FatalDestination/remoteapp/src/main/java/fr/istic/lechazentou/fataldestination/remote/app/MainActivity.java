@@ -24,7 +24,7 @@ import fr.istic.lechazentou.fataldestination.connection.bluetooth.DeviceListActi
 import android.widget.TextView;
 
 
-public class MainActivity extends Activity implements SensorEventListener {
+public class MainActivity extends ActionBarActivity implements SensorEventListener {
     private SensorManager sensorManager;
     private boolean goodPos = false;
     private TextView textView;
@@ -38,16 +38,15 @@ public class MainActivity extends Activity implements SensorEventListener {
     private static final String TAG = "RemoteApp";
 
     //Must be th same value than MESSAGE_READ in SpinnerActivity
-    private static final int ACTION_SEND = 2;
+    private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
+    private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
+    private static final int REQUEST_ENABLE_BT = 3;
 
-    private static final int REQUEST_CONNECT_DEVICE = 1;
-    private static final int REQUEST_ENABLE_BT = 2;
-
-    private BluetoothAdapter bluetoothAdapter;
+    private BluetoothAdapter bluetoothAdapter = null;
     private BluetoothService bluetoothService = null;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState)     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_remote);
         textView = (TextView) findViewById(R.id.textViewInfo);
@@ -58,7 +57,6 @@ public class MainActivity extends Activity implements SensorEventListener {
         if (bluetoothAdapter == null){
             Toast.makeText(this, "Bluetooth is not available", Toast.LENGTH_LONG).show();
             finish();
-            return;
         }
     }
 
@@ -139,6 +137,13 @@ public class MainActivity extends Activity implements SensorEventListener {
         textView.setBackgroundColor(Color.WHITE);
         goodPos = false;
     }
+
+    private void connectDevice(Intent data, boolean secure){
+        String address = data.getExtras().getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
+        BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
+        bluetoothService.connect(device, secure);
+    }
+
     private void sendSignal(){
         // TODO
         bluetoothService.send();
@@ -181,26 +186,43 @@ public class MainActivity extends Activity implements SensorEventListener {
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent){
         switch (requestCode){
-            case REQUEST_CONNECT_DEVICE:
+            case REQUEST_CONNECT_DEVICE_SECURE:
                 if (resultCode == Activity.RESULT_OK){
-                    String address = intent.getExtras().getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
-                    BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
-                    bluetoothService.connect(device);
+                    connectDevice(intent, true);
+                }
+                break;
+            case REQUEST_CONNECT_DEVICE_INSECURE:
+                if (resultCode == Activity.RESULT_OK){
+                    connectDevice(intent, false);
                 }
                 break;
             case REQUEST_ENABLE_BT:
                 if (resultCode == Activity.RESULT_OK){
                     bluetoothService = new BluetoothService(this, handler);
+                }else {
+                    finish();
                 }
         }
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_remote, menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == R.id.scan){
+        if(item.getItemId() == R.id.scan_secure){
             // Launch the DeviceListActivity to see devices and do scan
             Intent serverIntent = new Intent(this, DeviceListActivity.class);
-            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_SECURE);
+            return true;
+        }else if(item.getItemId() == R.id.scan_insecure){
+            // Launch the DeviceListActivity to see devices and do scan
+            Intent serverIntent = new Intent(this, DeviceListActivity.class);
+            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_INSECURE);
             return true;
         }
         else if(item.getItemId() == R.id.discoverable) {

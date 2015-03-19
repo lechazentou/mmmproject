@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,7 +21,18 @@ import android.view.View;
 import android.widget.DatePicker;
 import android.widget.Toast;
 
+import com.facebook.Request;
+import com.facebook.Response;
+import com.facebook.Session;
+import com.facebook.SessionState;
+import com.facebook.UiLifecycleHelper;
+import com.facebook.android.Facebook;
+import com.facebook.model.GraphUser;
+import com.facebook.widget.LoginButton;
+
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Random;
 
 import fr.istic.lechazentou.fataldestination.connection.bluetooth.BluetoothConstants;
@@ -78,10 +90,16 @@ public class MainActivity extends ActionBarActivity {
     // Member object for the chat services
     private BluetoothService mBluetoothService = null;*/
 
+    private LoginButton loginBtn;
+
+    private UiLifecycleHelper uiHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_spinner);
+
+        uiHelper = new UiLifecycleHelper(this, statusCallback);
 
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -93,8 +111,37 @@ public class MainActivity extends ActionBarActivity {
         }
         DatePicker datePicker = (DatePicker)findViewById(R.id.date_picker);
         datePicker.setEnabled(false);
-    }
+        loginBtn = (LoginButton) findViewById(R.id.fb_login_button);
 
+        loginBtn.setReadPermissions(Arrays.asList("email", "user_friends", "user_birthday"));
+        loginBtn.setUserInfoChangedCallback(new LoginButton.UserInfoChangedCallback() {
+            @Override
+            public void onUserInfoFetched(GraphUser user) {
+                if (user != null) {
+                    Toast.makeText(getApplicationContext(), "You are currently logged in as " + user.getName() + user.getBirthday(), Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "You are not logged in.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+    private Session.StatusCallback statusCallback = new Session.StatusCallback() {
+        @Override
+        public void call(Session session, SessionState state,
+                         Exception exception) {
+            if (state.isOpened()) {
+                Log.d("MainActivity", "Facebook session opened.");
+            } else if (state.isClosed()) {
+                Log.d("MainActivity", "Facebook session closed.");
+            }
+        }
+    };
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        uiHelper.onSaveInstanceState(outState);
+    }
 
     @Override
     public void onStart() {
@@ -121,6 +168,9 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public void onResume() {
         super.onResume();
+
+        uiHelper.onResume();
+
         // Performing this check in onResume() covers the case in which BT was
         // not enabled during onStart(), so we were paused to enable it...
         // onResume() will be called when ACTION_REQUEST_ENABLE activity returns.
@@ -133,9 +183,9 @@ public class MainActivity extends ActionBarActivity {
         }
     }
     @Override
-    public void onPause() {
-        // unregister listener
+    protected void onPause() {
         super.onPause();
+        uiHelper.onPause();
     }
 
     private void spin() {
@@ -148,7 +198,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
-    public void spin(View view) {
+    public void spin(final View view) {
         final DatePicker datePicker = (DatePicker)findViewById(R.id.date_picker);
         datePicker.animate()
                 .rotationX(1800)
@@ -167,11 +217,32 @@ public class MainActivity extends ActionBarActivity {
                         datePicker.updateDate(year, month, day);
                     }
                 });
+        Request request = Request.newMyFriendsRequest(Session.getActiveSession(), new Request.GraphUserListCallback() {
+
+            @Override
+            public void onCompleted(List<GraphUser> users, Response response) throws Exception {
+                int friend = new Random().nextInt(users.size());
+                Log.i("mustang", "response; " + response.toString());
+                Log.i("mustang", "UserListSize: " + users.size());
+                Log.i("mustang", users.get(friend).getId() + " " + users.get(friend).getFirstName() + " " + users.get(friend).getLastName());
+                //Bitmap bitmap = getFacebookProfilePicture(users.get(0).getId());
+                String userID = users.get(friend).getId();
+                new DownloadImageTask(MainActivity.this, view, users.get(friend).getFirstName()).execute("https://graph.facebook.com/" + userID + "/picture?type=large");
+
+            }
+        });
+        Bundle bundle = request.getParameters();
+        bundle.putString("fields", "id,first_name,last_name");
+        request.executeAsync();
+
+    }
+
+    public void displayMarker(String userName, Bitmap bitmap) {
         //Random to long and lat max
         ((MapFragment)getFragmentManager().findFragmentById(R.id.map_fragment))
                 .createMarketWithPerson(new Random().nextDouble() * 90 * (new Random().nextBoolean() ? 1 : -1),
                         new Random().nextDouble() * 180 * (new Random().nextBoolean() ? 1 : -1),
-                        BitmapFactory.decodeResource(getResources(), R.drawable.macaque), "Jean-Luc");
+                        bitmap, userName);
     }
 
     /**

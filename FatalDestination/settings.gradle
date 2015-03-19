@@ -1,1 +1,1 @@
-include ':app', ':map', ':facebookleecher', ':remoteapp', ':accelero', ':bluetooth', ':nfc', ':spinnerapp'
+include ':app', ':map', ':remoteapp', ':accelero', ':bluetooth', ':nfc', ':spinnerapp', ':facebook'

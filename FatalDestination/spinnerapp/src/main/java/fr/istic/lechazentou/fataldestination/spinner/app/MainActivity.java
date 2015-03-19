@@ -34,12 +34,14 @@ public class MainActivity extends ActionBarActivity {
     public static final int MESSAGE_READ = 2;
     public static final int MESSAGE_DEVICE_NAME = 4;
     public static final int MESSAGE_TOAST = 5;
+    public static final int ACTION_SEND = 6;
     // Key names received from the BluetoothChatService Handler
     public static final String DEVICE_NAME = "device_name";
     public static final String TOAST = "toast";
     // Intent request codes
-    private static final int REQUEST_CONNECT_DEVICE = 1;
-    private static final int REQUEST_ENABLE_BT = 2;
+    private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
+    private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
+    private static final int REQUEST_ENABLE_BT = 3;
 
     // Name of the connected device
     private String mConnectedDeviceName = null;
@@ -93,9 +95,9 @@ public class MainActivity extends ActionBarActivity {
                             break;
                     }
                     break;
-                case MESSAGE_READ:
+                /*case MESSAGE_READ:
                     spin();
-                    break;
+                    break;*/
                 case MESSAGE_DEVICE_NAME:
                     // save the connected device's name
                     mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
@@ -105,6 +107,9 @@ public class MainActivity extends ActionBarActivity {
                 case MESSAGE_TOAST:
                     Toast.makeText(getApplicationContext(), msg.getData().getString(TOAST),
                             Toast.LENGTH_SHORT).show();
+                    break;
+                case ACTION_SEND:
+                    spin();
                     break;
             }
         }
@@ -139,28 +144,22 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case REQUEST_CONNECT_DEVICE:
-                // When DeviceListActivity returns with a device to connect
-                if (resultCode == Activity.RESULT_OK) {
-                    // Get the device MAC address
-                    String address = data.getExtras()
-                            .getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
-                    // Get the BLuetoothDevice object
-                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
-                    // Attempt to connect to the device
-                    mBluetoothService.connect(device);
+    public void onActivityResult(int requestCode, int resultCode, Intent intent){
+        switch (requestCode){
+            case REQUEST_CONNECT_DEVICE_SECURE:
+                if (resultCode == Activity.RESULT_OK){
+                    connectDevice(intent, true);
+                }
+                break;
+            case REQUEST_CONNECT_DEVICE_INSECURE:
+                if (resultCode == Activity.RESULT_OK){
+                    connectDevice(intent, false);
                 }
                 break;
             case REQUEST_ENABLE_BT:
-                // When the request to enable Bluetooth returns
-                if (resultCode == Activity.RESULT_OK) {
-                    // Bluetooth is now enabled, so set up a chat session
+                if (resultCode == Activity.RESULT_OK){
                     mBluetoothService = new BluetoothService(this, mHandler);
-                } else {
-                    // User did not enable Bluetooth or an error occured
-                    Toast.makeText(this, "Bluetooth cannot connect", Toast.LENGTH_SHORT).show();
+                }else {
                     finish();
                 }
         }
@@ -211,13 +210,17 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == R.id.scan){
+        if(item.getItemId() == R.id.scan_secure){
             // Launch the DeviceListActivity to see devices and do scan
             Intent serverIntent = new Intent(this, DeviceListActivity.class);
-            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_SECURE);
             return true;
-        }
-        else if(item.getItemId() == R.id.discoverable) {
+        }else if(item.getItemId() == R.id.scan_insecure){
+            // Launch the DeviceListActivity to see devices and do scan
+            Intent serverIntent = new Intent(this, DeviceListActivity.class);
+            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_INSECURE);
+            return true;
+        }else if(item.getItemId() == R.id.discoverable) {
                 // Ensure this device is discoverable by others
                 ensureDiscoverable();
                 return true;
@@ -230,5 +233,11 @@ public class MainActivity extends ActionBarActivity {
         super.onDestroy();
         // Stop the Bluetooth chat services
         if (mBluetoothService != null) mBluetoothService.stop();
+    }
+
+    private void connectDevice(Intent data, boolean secure){
+        String address = data.getExtras().getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
+        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+        mBluetoothService.connect(device, secure);
     }
 }

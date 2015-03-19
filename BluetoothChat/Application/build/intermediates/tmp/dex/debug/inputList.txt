@@ -1,6 +1,0 @@
-/home/erwann/Documents/Cours/MMM/mmmproject/BluetoothChat/Application/build/intermediates/classes/debug
-/home/erwann/Documents/Cours/MMM/mmmproject/BluetoothChat/Application/build/intermediates/pre-dexed/debug/support-annotations-21.0.2-3e5547247799e802f3a179ac792313fd9707ad33.jar
-/home/erwann/Documents/Cours/MMM/mmmproject/BluetoothChat/Application/build/intermediates/pre-dexed/debug/classes-43f8a1248a515e0c58c4bf373a903abd60fb95ca.jar
-/home/erwann/Documents/Cours/MMM/mmmproject/BluetoothChat/Application/build/intermediates/pre-dexed/debug/classes-02c38cc8db3dba2c7470b49e974a21a7ea2a84e5.jar
-/home/erwann/Documents/Cours/MMM/mmmproject/BluetoothChat/Application/build/intermediates/pre-dexed/debug/internal_impl-21.0.2-4daa7c613355952973def50f1962c5510b6c23d3.jar
-/home/erwann/Documents/Cours/MMM/mmmproject/BluetoothChat/Application/build/intermediates/pre-dexed/debug/classes-8049002d47a3e5181239df17780b4a82f49641c9.jar

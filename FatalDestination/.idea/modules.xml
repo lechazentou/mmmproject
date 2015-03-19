@@ -6,7 +6,7 @@
       <module fileurl="file://$PROJECT_DIR$/accelero/accelero.iml" filepath="$PROJECT_DIR$/accelero/accelero.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/bluetooth/bluetooth.iml" filepath="$PROJECT_DIR$/bluetooth/bluetooth.iml" />
-      <module fileurl="file://$PROJECT_DIR$/facebookleecher/facebookleecher.iml" filepath="$PROJECT_DIR$/facebookleecher/facebookleecher.iml" />
+      <module fileurl="file://$PROJECT_DIR$/facebook/facebook.iml" filepath="$PROJECT_DIR$/facebook/facebook.iml" />
       <module fileurl="file://$PROJECT_DIR$/map/map.iml" filepath="$PROJECT_DIR$/map/map.iml" />
       <module fileurl="file://$PROJECT_DIR$/nfc/nfc.iml" filepath="$PROJECT_DIR$/nfc/nfc.iml" />
       <module fileurl="file://$PROJECT_DIR$/remoteapp/remoteapp.iml" filepath="$PROJECT_DIR$/remoteapp/remoteapp.iml" />

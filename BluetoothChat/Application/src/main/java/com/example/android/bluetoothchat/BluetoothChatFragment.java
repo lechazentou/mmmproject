@@ -20,13 +20,20 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -42,12 +49,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.android.common.logger.Log;
-
 /**
  * This fragment controls Bluetooth to communicate with other devices.
  */
-public class BluetoothChatFragment extends Fragment {
+public class BluetoothChatFragment extends Fragment implements SensorEventListener {
 
     private static final String TAG = "BluetoothChatFragment";
 
@@ -56,10 +61,18 @@ public class BluetoothChatFragment extends Fragment {
     private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
     private static final int REQUEST_ENABLE_BT = 3;
 
+    /**
+     * accelero
+     */
+    private SensorManager sensorManager;
+    private boolean goodPos = false;
+    private TextView textView;
+    private long lastUpdate = 0;
+    private float last_x, last_y, last_z;
+    private boolean msgSent = false;
+
     // Layout Views
     private ListView mConversationView;
-    private EditText mOutEditText;
-    private Button mSendButton;
 
     /**
      * Name of the connected device
@@ -99,6 +112,87 @@ public class BluetoothChatFragment extends Fragment {
             Toast.makeText(activity, "Bluetooth is not available", Toast.LENGTH_LONG).show();
             activity.finish();
         }
+        sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+        lastUpdate = System.currentTimeMillis();
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            getAccelerometer(event);
+        }
+        sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+        lastUpdate = System.currentTimeMillis();
+    }
+
+    private void getAccelerometer(SensorEvent sensorEvent) {
+
+        float x = sensorEvent.values[0];
+        float y = sensorEvent.values[1];
+        float z = sensorEvent.values[2];
+
+        long curTime = System.currentTimeMillis();
+
+        if ((curTime - lastUpdate) > 200) {
+            long diffTime = (curTime - lastUpdate);
+            lastUpdate = curTime;
+
+            float speed = Math.abs(x + y + z - last_x - last_y - last_z)/ diffTime * 10000;
+
+            String txt = " X : "  + x;
+
+            txt += "\n Y : "  + y;
+
+            txt += "\n Z : "  + z;
+
+            txt += "\n speed : " + speed;
+
+
+            if (-2 < x && x < 3 && 8 < y && -5 < z && z < 5){
+                goodPosition();
+            }
+            else if (x < -4 && 8 > y && -5 < z && z < 5 && goodPos && !msgSent){
+                sendSignal();
+            }
+            else if (-5 > z || z > 5 || x >2){
+                badPosition();
+            }
+
+            //textView.setText(txt);
+
+            last_x = x;
+            last_y = y;
+            last_z = z;
+        }
+    }
+
+    private void goodPosition(){
+        String txt = "\n\nGOOD ! LET'S GO !";
+        textView.setText(txt);
+        textView.setBackgroundColor(Color.BLUE);
+        goodPos = true;
+        msgSent = false;
+    }
+
+    private void badPosition(){
+        String txt = "\n\nPut the device in good position";
+        textView.setText(txt);
+        textView.setBackgroundColor(Color.WHITE);
+        goodPos = false;
+        msgSent = false;
+    }
+    private void sendSignal(){
+        sendMessage("\n\nYouhou");
+        msgSent = true;
+        textView.setBackgroundColor(Color.RED);
+    }
+
+
+
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
     }
 
 
@@ -128,6 +222,12 @@ public class BluetoothChatFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
+        // register this class as a listener for the orientation and
+        // accelerometer sensors
+        sensorManager.registerListener(this,
+                sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                SensorManager.SENSOR_DELAY_NORMAL);
+
         // Performing this check in onResume() covers the case in which BT was
         // not enabled during onStart(), so we were paused to enable it...
         // onResume() will be called when ACTION_REQUEST_ENABLE activity returns.
@@ -139,6 +239,12 @@ public class BluetoothChatFragment extends Fragment {
             }
         }
     }
+    @Override
+    public void onPause() {
+        // unregister listener
+        super.onPause();
+        sensorManager.unregisterListener(this);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -149,7 +255,8 @@ public class BluetoothChatFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         mConversationView = (ListView) view.findViewById(R.id.in);
-        mSendButton = (Button) view.findViewById(R.id.button_send);
+        textView = (TextView) view.findViewById(R.id.textViewInfo);
+        badPosition();
     }
 
     /**
@@ -162,17 +269,6 @@ public class BluetoothChatFragment extends Fragment {
         mConversationArrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.message);
 
         mConversationView.setAdapter(mConversationArrayAdapter);
-
-        // Initialize the send button with a listener that for click events
-        mSendButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // Send a message using content of the edit text widget
-                View view = getView();
-                if (null != view) {
-                    sendMessage("Yo");
-                }
-            }
-        });
 
         // Initialize the BluetoothChatService to perform bluetooth connections
         mChatService = new BluetoothChatService(getActivity(), mHandler);

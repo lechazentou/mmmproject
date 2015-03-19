@@ -301,7 +301,11 @@ public class Request {
             @Override
             public void onCompleted(Response response) {
                 if (callback != null) {
-                    callback.onCompleted(typedListFromResponse(response, GraphUser.class), response);
+                    try {
+                        callback.onCompleted(typedListFromResponse(response, GraphUser.class), response);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         };
@@ -2433,7 +2437,7 @@ public class Request {
          * @param users    the list of GraphObjects representing the returned friends, or null
          * @param response the Response of this request, which may include error information if the request was unsuccessful
          */
-        void onCompleted(List<GraphUser> users, Response response);
+        void onCompleted(List<GraphUser> users, Response response) throws Exception;
     }
 
     /**

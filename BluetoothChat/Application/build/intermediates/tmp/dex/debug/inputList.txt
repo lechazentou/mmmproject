@@ -1,6 +1,7 @@
 /Users/flolegazier/AndroidStudioProjects/mmmproject/BluetoothChat/Application/build/intermediates/classes/debug
-/Users/flolegazier/AndroidStudioProjects/mmmproject/BluetoothChat/Application/build/intermediates/pre-dexed/debug/support-annotations-21.0.2-2f8957169708f3c423b247c1f1074c3ab44d94d9.jar
+/Users/flolegazier/AndroidStudioProjects/mmmproject/BluetoothChat/Application/build/intermediates/pre-dexed/debug/support-annotations-21.0.3-f2ab4f6e0cf89a44011d2b137abdcb386d555b7f.jar
 /Users/flolegazier/AndroidStudioProjects/mmmproject/BluetoothChat/Application/build/intermediates/pre-dexed/debug/classes-ffb7ccb866ba70c1cd55b2d94b5d0f4de794942b.jar
 /Users/flolegazier/AndroidStudioProjects/mmmproject/BluetoothChat/Application/build/intermediates/pre-dexed/debug/classes-8a7e63c86442e004fb4a83fe8bbedd17418bf776.jar
-/Users/flolegazier/AndroidStudioProjects/mmmproject/BluetoothChat/Application/build/intermediates/pre-dexed/debug/internal_impl-21.0.2-004a6fcafeaf85321866604d7c93aa12955bedca.jar
-/Users/flolegazier/AndroidStudioProjects/mmmproject/BluetoothChat/Application/build/intermediates/pre-dexed/debug/classes-55801cf7b8a19ad433f4cfe794749e132a953c6f.jar
+/Users/flolegazier/AndroidStudioProjects/mmmproject/BluetoothChat/Application/build/intermediates/pre-dexed/debug/internal_impl-21.0.3-57c0b962313135eb40c45507145aeb20173a8357.jar
+/Users/flolegazier/AndroidStudioProjects/mmmproject/BluetoothChat/Application/build/intermediates/pre-dexed/debug/classes-f28840b6abde936d442cdc31658d261833280008.jar
+/Users/flolegazier/AndroidStudioProjects/mmmproject/BluetoothChat/Application/build/intermediates/pre-dexed/debug/classes-4dba4c7d2a09a5af1723302aa8400f1a1a7bbd91.jar

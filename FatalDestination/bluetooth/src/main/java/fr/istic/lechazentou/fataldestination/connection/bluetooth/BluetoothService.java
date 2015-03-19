@@ -23,20 +23,24 @@ import java.util.UUID;
 public class BluetoothService {
 
     private static final String TAG = "Bluetooth Connect Service";
-    private static final String NAME = "FatalDestinationBluetooth";
-    private static final UUID MY_UUID = UUID.fromString("fa87c0d0-afac-11de-8a39-0800200c9a66");
+    private static final String NAME_SECURE = "FatalDestinationBluetoothSecure";
+    private static final String NAME_INSECURE = "FatalDestinationBluetoothInsecure";
+    // Unique UUID for this application
+    private static final UUID MY_UUID_SECURE =
+            UUID.fromString("fa87c0d0-afac-11de-8a39-0800200c9a66");
+    private static final UUID MY_UUID_INSECURE =
+            UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
 
     public static final int STATE_NONE = 0;
     public static final int STATE_LISTEN = 1;
     public static final int STATE_CONNECTING = 2;
     public static final int STATE_CONNECTED = 3;
 
-    private static final int ACTION_SEND = 1;
-
     private BluetoothAdapter bluetoothAdapter;
     private Handler handler;
     private int state;
-    private AcceptThread acceptThread;
+    private AcceptThread secureAcceptThread;
+    private AcceptThread unsecureAcceptThread;
     private ConnectedThread connectedThread;
     private ConnectThread connectThread;
 
@@ -65,32 +69,40 @@ public class BluetoothService {
             connectedThread.cancel();
             connectedThread = null;
         }
-        if (acceptThread == null){
-            acceptThread = new AcceptThread();
-            acceptThread.start();
-        }
+
         setState(STATE_LISTEN);
+
+        if (secureAcceptThread == null){
+            secureAcceptThread = new AcceptThread(true);
+            secureAcceptThread.start();
+        }
+        if (unsecureAcceptThread == null){
+            unsecureAcceptThread = new AcceptThread(false);
+            unsecureAcceptThread.start();
+        }
     }
 
-    public synchronized void connect(BluetoothDevice device) {
+    public synchronized void connect(BluetoothDevice device, boolean secure) {
         if (state == STATE_CONNECTING) {
             if (connectThread != null) {connectThread.cancel(); connectThread = null;}
         }
         if (connectedThread != null) {connectedThread.cancel(); connectedThread = null;}
-        connectThread = new ConnectThread(device);
+        connectThread = new ConnectThread(device, secure);
         connectThread.start();
         setState(STATE_CONNECTING);
     }
 
-    public synchronized void connected(BluetoothSocket socket, BluetoothDevice device) {
+    public synchronized void connected(BluetoothSocket socket, BluetoothDevice device, final String socketType) {
 
         if (connectThread != null) {connectThread.cancel(); connectThread = null;}
 
         if (connectedThread != null) {connectedThread.cancel(); connectedThread = null;}
 
-        if (acceptThread != null) {acceptThread.cancel(); acceptThread = null;}
+        if (secureAcceptThread != null) {secureAcceptThread.cancel(); secureAcceptThread = null;}
 
-        connectedThread = new ConnectedThread(socket);
+        if (unsecureAcceptThread != null) {unsecureAcceptThread.cancel(); unsecureAcceptThread = null;}
+
+        connectedThread = new ConnectedThread(socket, socketType);
         connectedThread.start();
 
         //Message msg = handler.obtainMessage(BluetoothChat.MESSAGE_DEVICE_NAME);
@@ -104,51 +116,50 @@ public class BluetoothService {
     public synchronized void stop() {
         if (connectThread != null) {connectThread.cancel(); connectThread = null;}
         if (connectedThread != null) {connectedThread.cancel(); connectedThread = null;}
-        if (acceptThread != null) {acceptThread.cancel(); acceptThread = null;}
+        if (secureAcceptThread != null) {secureAcceptThread.cancel(); secureAcceptThread = null;}
+        if (unsecureAcceptThread != null) {unsecureAcceptThread.cancel(); unsecureAcceptThread = null;}
         setState(STATE_NONE);
     }
 
     private void connectionFailed() {
-        setState(STATE_LISTEN);
-        //Message msg = handler.obtainMessage(BluetoothChat.MESSAGE_TOAST);
-        //Bundle bundle = new Bundle();
-        //bundle.putString(BluetoothChat.TOAST, "Unable to connect device");
-        //msg.setData(bundle);
-        //handler.sendMessage(msg);
+        BluetoothService.this.start();
     }
 
     private void connectionLost() {
-        setState(STATE_LISTEN);
-        //Message msg = handler.obtainMessage(BluetoothChat.MESSAGE_TOAST);
-        //Bundle bundle = new Bundle();
-        //bundle.putString(BluetoothChat.TOAST, "Device connection was lost");
-        //msg.setData(bundle);
-        //handler.sendMessage(msg);
+        BluetoothService.this.start();
+    }
+
+    public void send(){
+        ConnectedThread connectedThread1;
+        synchronized (this) {
+            if (state != STATE_CONNECTED)return;
+            connectedThread1 = connectedThread;
+        }
+        connectedThread1.send();
     }
 
     private class AcceptThread extends Thread {
 
         private final BluetoothServerSocket serverSocket;
+        private String socketType;
 
-        public AcceptThread() {
+        public AcceptThread(boolean secure) {
             BluetoothServerSocket tmp = null;
-
+            socketType = secure ? "Secure" : "Insecure";
             try {
-                Method m = bluetoothAdapter.getClass().getMethod("listenUsingRfcommOn", new Class[] {int.class});
-                tmp = (BluetoothServerSocket) m.invoke(bluetoothAdapter, MY_UUID);
-                //tmp = bluetoothAdapter.listenUsingRfcommWithServiceRecord(NAME, MY_UUID);
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                if (secure){
+                    tmp = bluetoothAdapter.listenUsingRfcommWithServiceRecord(NAME_SECURE, MY_UUID_SECURE);
+                }else {
+                    tmp = bluetoothAdapter.listenUsingInsecureRfcommWithServiceRecord(NAME_INSECURE, MY_UUID_INSECURE);
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "Socket type : "+socketType+" listen() failed", e);
             }
             serverSocket = tmp;
         }
 
         public void run(){
-            setName("AcceptThread");
+            setName("AcceptThread"+socketType);
             BluetoothSocket socket = null;
 
             while (state != STATE_CONNECTED) {
@@ -165,7 +176,7 @@ public class BluetoothService {
                             case STATE_LISTEN:
                             case STATE_CONNECTING:
                                 Log.i(TAG,"STATE CONNECTING");
-                                connected(socket, socket.getRemoteDevice());
+                                connected(socket, socket.getRemoteDevice(), socketType);
                                 break;
                             case STATE_NONE:
                             case STATE_CONNECTED:
@@ -193,13 +204,19 @@ public class BluetoothService {
     private class ConnectThread extends Thread {
         private final BluetoothSocket socket;
         private final BluetoothDevice device;
+        private String socketType;
 
-        public ConnectThread(BluetoothDevice device) {
+        public ConnectThread(BluetoothDevice device, boolean secure) {
             this.device = device;
             BluetoothSocket tmp = null;
+            socketType = secure ? "Secure" : "Insecure";
 
             try {
-                tmp = device.createRfcommSocketToServiceRecord(MY_UUID);
+                if (secure){
+                    tmp = device.createRfcommSocketToServiceRecord(MY_UUID_SECURE);
+                }else {
+                    tmp = device.createInsecureRfcommSocketToServiceRecord(MY_UUID_INSECURE);
+                }
             } catch (IOException e){
                 Log.e(TAG, "create() failed", e);
             }
@@ -207,26 +224,27 @@ public class BluetoothService {
         }
 
         public void run(){
-            setName("ConnectThread");
+            setName("ConnectThread"+socketType);
 
             bluetoothAdapter.cancelDiscovery();
 
             try {
                 socket.connect();
             } catch (IOException e){
-                connectionFailed();
                 try {
                     socket.close();
                 } catch (IOException e1){
                     Log.e(TAG, "unable to close socket during connection fail", e1);
                 }
+                connectionFailed();
+                return;
             }
 
             synchronized (BluetoothService.this) {
-                connectedThread = null;
+                connectThread = null;
             }
 
-            connected(socket, device);
+            connected(socket, device, socketType);
         }
 
         public void cancel() {
@@ -239,31 +257,22 @@ public class BluetoothService {
 
     }
 
-    public void send(){
-        ConnectedThread connectedThread1;
-        synchronized (this) {
-            if (state != STATE_CONNECTED)return;
-            connectedThread1 = connectedThread;
-        }
-        connectedThread1.send();
-    }
-
     private class ConnectedThread extends Thread {
         private final BluetoothSocket socket;
 
-        public ConnectedThread(BluetoothSocket socket) {
+        public ConnectedThread(BluetoothSocket socket, String socketType) {
             this.socket = socket;
         }
 
         public void run() {
             while (true) {
-                handler.obtainMessage(ACTION_SEND)
+                handler.obtainMessage(BluetoothConstants.ACTION_SEND)
                         .sendToTarget();
             }
         }
 
         public void send() {
-                handler.sendEmptyMessage(ACTION_SEND);
+                handler.obtainMessage(BluetoothConstants.ACTION_SEND).sendToTarget();
         }
 
         public void cancel() {

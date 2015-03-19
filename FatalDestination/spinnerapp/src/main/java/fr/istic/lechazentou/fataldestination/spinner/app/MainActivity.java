@@ -6,6 +6,7 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -118,6 +119,7 @@ public class MainActivity extends ActionBarActivity {
             public void onUserInfoFetched(GraphUser user) {
                 if (user != null) {
                     Toast.makeText(getApplicationContext(), "You are currently logged in as " + user.getName() + user.getBirthday(), Toast.LENGTH_SHORT).show();
+                    loginBtn.setVisibility(View.GONE);
                 } else {
                     Toast.makeText(getApplicationContext(), "You are not logged in.", Toast.LENGTH_SHORT).show();
                 }
@@ -188,7 +190,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void spin() {
-        spin(null);
+        spin(getApplicationContext());
     }
 
     @Override
@@ -197,7 +199,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
-    public void spin(final View view) {
+    public void spin(final Context context) {
         final DatePicker datePicker = (DatePicker)findViewById(R.id.date_picker);
         datePicker.animate()
                 .rotationX(1800)
@@ -226,7 +228,7 @@ public class MainActivity extends ActionBarActivity {
                 Log.i("mustang", users.get(friend).getId() + " " + users.get(friend).getFirstName() + " " + users.get(friend).getLastName());
                 //Bitmap bitmap = getFacebookProfilePicture(users.get(0).getId());
                 String userID = users.get(friend).getId();
-                new DownloadImageTask(MainActivity.this, view, users.get(friend).getFirstName()).execute("https://graph.facebook.com/" + userID + "/picture?type=large");
+                new DownloadImageTask(MainActivity.this, context, users.get(friend).getFirstName()).execute("https://graph.facebook.com/" + userID + "/picture?type=large");
 
             }
         });

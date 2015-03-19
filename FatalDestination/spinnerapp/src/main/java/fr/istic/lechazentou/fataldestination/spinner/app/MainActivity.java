@@ -13,12 +13,20 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.Toast;
 
+import com.facebook.Session;
+import com.facebook.SessionState;
+import com.facebook.UiLifecycleHelper;
+import com.facebook.model.GraphUser;
+import com.facebook.widget.LoginButton;
+
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Random;
 
@@ -50,10 +58,16 @@ public class MainActivity extends ActionBarActivity {
     // Member object for the chat services
     private BluetoothService mBluetoothService = null;
 
+    private LoginButton loginBtn;
+
+    private UiLifecycleHelper uiHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_spinner);
+
+        uiHelper = new UiLifecycleHelper(this, statusCallback);
 
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -65,7 +79,32 @@ public class MainActivity extends ActionBarActivity {
         }
         DatePicker datePicker = (DatePicker)findViewById(R.id.date_picker);
         datePicker.setEnabled(false);
+        loginBtn = (LoginButton) findViewById(R.id.fb_login_button);
+
+        loginBtn.setReadPermissions(Arrays.asList("email", "user_friends", "user_birthday"));
+        loginBtn.setUserInfoChangedCallback(new LoginButton.UserInfoChangedCallback() {
+            @Override
+            public void onUserInfoFetched(GraphUser user) {
+                if (user != null) {
+                    Toast.makeText(getApplicationContext(), "You are currently logged in as " + user.getName() + user.getBirthday(), Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "You are not logged in.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
+
+    private Session.StatusCallback statusCallback = new Session.StatusCallback() {
+        @Override
+        public void call(Session session, SessionState state,
+                         Exception exception) {
+            if (state.isOpened()) {
+                Log.d("MainActivity", "Facebook session opened.");
+            } else if (state.isClosed()) {
+                Log.d("MainActivity", "Facebook session closed.");
+            }
+        }
+    };
 
     private void ensureDiscoverable() {
         if (mBluetoothAdapter.getScanMode() !=
@@ -116,6 +155,12 @@ public class MainActivity extends ActionBarActivity {
     };
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        uiHelper.onSaveInstanceState(outState);
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
         // If BT is not on, request that it be enabled.
@@ -132,6 +177,9 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public synchronized void onResume() {
         super.onResume();
+
+        uiHelper.onResume();
+
         // Performing this check in onResume() covers the case in which BT was
         // not enabled during onStart(), so we were paused to enable it...
         // onResume() will be called when ACTION_REQUEST_ENABLE activity returns.
@@ -144,7 +192,14 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        uiHelper.onPause();
+    }
+
     public void onActivityResult(int requestCode, int resultCode, Intent intent){
+        uiHelper.onActivityResult(requestCode, resultCode, intent);
         switch (requestCode){
             case REQUEST_CONNECT_DEVICE_SECURE:
                 if (resultCode == Activity.RESULT_OK){
@@ -231,6 +286,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        uiHelper.onDestroy();
         // Stop the Bluetooth chat services
         if (mBluetoothService != null) mBluetoothService.stop();
     }

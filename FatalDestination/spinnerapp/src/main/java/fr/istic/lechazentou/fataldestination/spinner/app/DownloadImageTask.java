@@ -19,11 +19,9 @@ public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
     private final String userName;
     private final MainActivity activity;
 
-    private ProgressDialog mDialog;
-    public DownloadImageTask(MainActivity activity, Context context, String userName) {
+    public DownloadImageTask(MainActivity activity, String userName) {
         this.activity = activity;
         this.userName = userName;
-        // mDialog = ProgressDialog.show(context,"Please wait...", "Retrieving data ...", true);
     }
 
     protected void onPreExecute() {
@@ -46,7 +44,5 @@ public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
 
     protected void onPostExecute(Bitmap result) {
         activity.displayMarker(userName, result);
-        //close
-        //mDialog.dismiss();
     }
 }

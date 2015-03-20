@@ -50,12 +50,7 @@ public class MainActivity extends ActionBarActivity {
     /**
      * Name of the connected device
      */
-    private String mConnectedDeviceName = null;
-
-    /**
-     * String buffer for outgoing messages
-     */
-    private StringBuffer mOutStringBuffer;
+    private String connectedDeviceName = null;
 
     /**
      * Local Bluetooth adapter
@@ -65,31 +60,16 @@ public class MainActivity extends ActionBarActivity {
     /**
      * Member object for the chat services
      */
-    private BluetoothService mChatService = null;
+    private BluetoothService bluetoothService = null;
 
-   /* // Message types sent from the BluetoothChatService Handler
-    public static final int MESSAGE_STATE_CHANGE = 1;
-    public static final int MESSAGE_READ = 2;
-    public static final int MESSAGE_DEVICE_NAME = 4;
-    public static final int MESSAGE_TOAST = 5;
-    public static final int ACTION_SEND = 6;
-    // Key names received from the BluetoothChatService Handler
-    public static final String DEVICE_NAME = "device_name";
-    public static final String TOAST = "toast";
-    // Intent request codes
-    private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
-    private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
-    private static final int REQUEST_ENABLE_BT = 3;
-
-    // Name of the connected device
-    private String mConnectedDeviceName = null;
-    // Local Bluetooth adapter
-    private BluetoothAdapter mBluetoothAdapter = null;
-    // Member object for the chat services
-    private BluetoothService mBluetoothService = null;*/
-
+    /**
+     * Facebook login button
+     */
     private LoginButton loginBtn;
 
+    /**
+     * Facebook helper
+     */
     private UiLifecycleHelper uiHelper;
 
     @Override
@@ -107,22 +87,27 @@ public class MainActivity extends ActionBarActivity {
             finish();
             return;
         }
+        //Disable date picker
         DatePicker datePicker = (DatePicker)findViewById(R.id.date_picker);
         datePicker.setEnabled(false);
-        loginBtn = (LoginButton) findViewById(R.id.fb_login_button);
 
+        //Initialize login button
+        loginBtn = (LoginButton) findViewById(R.id.fb_login_button);
         loginBtn.setReadPermissions(Arrays.asList("email", "user_friends", "user_birthday"));
         loginBtn.setUserInfoChangedCallback(new LoginButton.UserInfoChangedCallback() {
             @Override
             public void onUserInfoFetched(GraphUser user) {
                 if (user != null) {
                     Toast.makeText(getApplicationContext(), "You are currently logged in as " + user.getName() + user.getBirthday(), Toast.LENGTH_SHORT).show();
+                    loginBtn.setVisibility(View.GONE);
                 } else {
                     Toast.makeText(getApplicationContext(), "You are not logged in.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
+
+    //Facebook status callback for logging
     private Session.StatusCallback statusCallback = new Session.StatusCallback() {
         @Override
         public void call(Session session, SessionState state,
@@ -150,7 +135,7 @@ public class MainActivity extends ActionBarActivity {
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
             // Otherwise, setup the chat session
-        } else if (mChatService == null) {
+        } else if (bluetoothService == null) {
             setupChat();
         }
     }
@@ -158,8 +143,8 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mChatService != null) {
-            mChatService.stop();
+        if (bluetoothService != null) {
+            bluetoothService.stop();
         }
     }
 
@@ -172,11 +157,11 @@ public class MainActivity extends ActionBarActivity {
         // Performing this check in onResume() covers the case in which BT was
         // not enabled during onStart(), so we were paused to enable it...
         // onResume() will be called when ACTION_REQUEST_ENABLE activity returns.
-        if (mChatService != null) {
+        if (bluetoothService != null) {
             // Only if the state is STATE_NONE, do we know that we haven't started already
-            if (mChatService.getState() == BluetoothService.STATE_NONE) {
+            if (bluetoothService.getState() == BluetoothService.STATE_NONE) {
                 // Start the Bluetooth chat services
-                mChatService.start();
+                bluetoothService.start();
             }
         }
     }
@@ -186,17 +171,13 @@ public class MainActivity extends ActionBarActivity {
         uiHelper.onPause();
     }
 
-    private void spin() {
-        spin(null);
-    }
-
     @Override
     protected void onResumeFragments() {
         super.onResumeFragments();
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
-    public void spin(final View view) {
+    public void spin() {
         final DatePicker datePicker = (DatePicker)findViewById(R.id.date_picker);
         datePicker.animate()
                 .rotationX(1800)
@@ -223,9 +204,8 @@ public class MainActivity extends ActionBarActivity {
                 Log.i("mustang", "response; " + response.toString());
                 Log.i("mustang", "UserListSize: " + users.size());
                 Log.i("mustang", users.get(friend).getId() + " " + users.get(friend).getFirstName() + " " + users.get(friend).getLastName());
-                //Bitmap bitmap = getFacebookProfilePicture(users.get(0).getId());
                 String userID = users.get(friend).getId();
-                new DownloadImageTask(MainActivity.this, view, users.get(friend).getFirstName()).execute("https://graph.facebook.com/" + userID + "/picture?type=large");
+                new DownloadImageTask(MainActivity.this, users.get(friend).getFirstName()).execute("https://graph.facebook.com/" + userID + "/picture?type=large");
 
             }
         });
@@ -235,6 +215,12 @@ public class MainActivity extends ActionBarActivity {
 
     }
 
+    /**
+     * Display a marker on the map containing the name of the user and his profile photo
+     *
+     * @param userName The first name of the user
+     * @param bitmap The profile picture of the user
+     */
     public void displayMarker(String userName, Bitmap bitmap) {
         //Random to long and lat max
         ((MapFragment)getFragmentManager().findFragmentById(R.id.map_fragment))
@@ -250,10 +236,7 @@ public class MainActivity extends ActionBarActivity {
         Log.d(TAG, "setupChat()");
 
         // Initialize the BluetoothChatService to perform bluetooth connections
-        mChatService = new BluetoothService(this.getApplicationContext(), mHandler);
-
-        // Initialize the buffer for outgoing messages
-        mOutStringBuffer = new StringBuffer("");
+        bluetoothService = new BluetoothService(this.getApplicationContext(), mHandler);
     }
 
     /**
@@ -265,30 +248,6 @@ public class MainActivity extends ActionBarActivity {
             Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
             discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
             startActivity(discoverableIntent);
-        }
-    }
-
-    /**
-     * Sends a message.
-     *
-     * @param message A string of text to send.
-     */
-    private void sendMessage(String message) {
-        // Check that we're actually connected before trying anything
-        if (mChatService.getState() != BluetoothService.STATE_CONNECTED) {
-            Toast.makeText(this, R.string.not_connected, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Check that there's actually something to send
-        if (message.length() > 0) {
-            // Get the message bytes and tell the BluetoothChatService to write
-            byte[] send = message.getBytes();
-            mChatService.write(send);
-
-            // Reset out string buffer to zero and clear the edit text field
-            mOutStringBuffer.setLength(0);
-            //mOutEditText.setText(mOutStringBuffer);
         }
     }
 
@@ -328,7 +287,7 @@ public class MainActivity extends ActionBarActivity {
                 case BluetoothConstants.MESSAGE_STATE_CHANGE:
                     switch (msg.arg1) {
                         case BluetoothService.STATE_CONNECTED:
-                            setStatus(getString(R.string.title_connected_to, mConnectedDeviceName));
+                            setStatus(getString(R.string.title_connected_to, connectedDeviceName));
                             //mConversationArrayAdapter.clear();
                             break;
                         case BluetoothService.STATE_CONNECTING:
@@ -357,13 +316,13 @@ public class MainActivity extends ActionBarActivity {
                     Toast.makeText(getApplicationContext(), readMessage,
                             Toast.LENGTH_SHORT).show();
                     spin();
-                    //mConversationArrayAdapter.add(mConnectedDeviceName + ":  " + readMessage);
+                    //mConversationArrayAdapter.add(connectedDeviceName + ":  " + readMessage);
                     break;
                 case BluetoothConstants.MESSAGE_DEVICE_NAME:
                     // save the connected device's name
-                    mConnectedDeviceName = msg.getData().getString(BluetoothConstants.DEVICE_NAME);
+                    connectedDeviceName = msg.getData().getString(BluetoothConstants.DEVICE_NAME);
                     Toast.makeText(getApplicationContext(), "Connected to "
-                            + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
+                            + connectedDeviceName, Toast.LENGTH_SHORT).show();
                     break;
                 case BluetoothConstants.MESSAGE_TOAST:
                     Toast.makeText(getApplicationContext(), msg.getData().getString(BluetoothConstants.TOAST),
@@ -374,6 +333,8 @@ public class MainActivity extends ActionBarActivity {
     };
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        uiHelper.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case REQUEST_CONNECT_DEVICE_SECURE:
                 // When DeviceListActivity returns with a device to connect
@@ -415,7 +376,7 @@ public class MainActivity extends ActionBarActivity {
         // Get the BluetoothDevice object
         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
         // Attempt to connect to the device
-        mChatService.connect(device, secure);
+        bluetoothService.connect(device, secure);
     }
 
     @Override
@@ -428,15 +389,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int i = item.getItemId();
-        if (i == R.id.scan_secure) {
-            Intent serverIntent = new Intent(this, DeviceListActivity.class);
-            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_SECURE);
-            return true;
-        } else if (i == R.id.scan_insecure) {
-            Intent serverIntent = new Intent(this, DeviceListActivity.class);
-            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_INSECURE);
-            return true;
-        } else if (i == R.id.discoverable) {
+        if (i == R.id.discoverable) {
             ensureDiscoverable();
             return true;
         }

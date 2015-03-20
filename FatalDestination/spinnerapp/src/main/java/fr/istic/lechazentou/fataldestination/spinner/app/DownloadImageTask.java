@@ -1,6 +1,7 @@
 package fr.istic.lechazentou.fataldestination.spinner.app;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -18,11 +19,9 @@ public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
     private final String userName;
     private final MainActivity activity;
 
-    private ProgressDialog mDialog;
-    public DownloadImageTask(MainActivity activity, View view, String userName) {
+    public DownloadImageTask(MainActivity activity, String userName) {
         this.activity = activity;
         this.userName = userName;
-        mDialog = ProgressDialog.show(view.getContext(),"Please wait...", "Retrieving data ...", true);
     }
 
     protected void onPreExecute() {
@@ -45,7 +44,5 @@ public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
 
     protected void onPostExecute(Bitmap result) {
         activity.displayMarker(userName, result);
-        //close
-        mDialog.dismiss();
     }
 }

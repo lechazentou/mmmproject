@@ -18,25 +18,18 @@
         facebook:confirm_logout="false"
         facebook:fetch_user_info="true" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="test"
-        android:onClick="spin"/>
-
     <DatePicker
         android:id="@+id/date_picker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:datePickerMode="spinner"
         android:calendarViewShown="false"
-        android:layout_gravity="center"/>
+        android:layout_gravity="center" />
 
     <TextView
-        android:text="@string/killedby"
+        android:text="@string/killed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
-
 
     <fragment
         android:layout_width="wrap_content"

@@ -172,13 +172,48 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onResumeFragments() {
         super.onResumeFragments();
+    }public void compatibleSpin() {
+        if(Build.VERSION.SDK_INT >= 19)
+            highSpin();
+        else
+            lowSpin();
+    }
+
+    private void lowSpin() {
+        final DatePicker datePicker = (DatePicker)findViewById(R.id.date_picker);
+        int LowY = Calendar.getInstance().get(Calendar.YEAR);
+        int year = new Random().nextInt(50) + LowY;
+        int month = new Random().nextInt(12 -
+                (LowY == year ? Calendar.getInstance().get(Calendar.MONTH) : 1)) +
+                (LowY == year ? Calendar.getInstance().get(Calendar.MONTH) : 1);
+        int day = new Random().nextInt(31 -
+                (year == LowY && month == Calendar.getInstance().get(Calendar.MONTH) ? Calendar.getInstance().get(Calendar.DAY_OF_MONTH) : 1)) +
+                (year == LowY && month == Calendar.getInstance().get(Calendar.MONTH) ? Calendar.getInstance().get(Calendar.DAY_OF_MONTH) : 1);
+        datePicker.updateDate(year, month, day);
+        Request request = Request.newMyFriendsRequest(Session.getActiveSession(), new Request.GraphUserListCallback() {
+
+            @Override
+            public void onCompleted(List<GraphUser> users, Response response) throws Exception {
+                int friend = new Random().nextInt(users.size());
+                Log.i("mustang", "response; " + response.toString());
+                Log.i("mustang", "UserListSize: " + users.size());
+                Log.i("mustang", users.get(friend).getId() + " " + users.get(friend).getFirstName() + " " + users.get(friend).getLastName());
+                String userID = users.get(friend).getId();
+                new DownloadImageTask(MainActivity.this, users.get(friend).getFirstName()).execute("https://graph.facebook.com/" + userID + "/picture?type=large");
+
+            }
+        });
+        Bundle bundle = request.getParameters();
+        bundle.putString("fields", "id,first_name,last_name");
+        request.executeAsync();
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
-    public void spin() {
+    public void highSpin() {
         final DatePicker datePicker = (DatePicker)findViewById(R.id.date_picker);
+        datePicker.clearAnimation();
         datePicker.animate()
-                .rotationX(1800)
+                .rotationX(0)
                 .setDuration(3000)
                 .setUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                     @Override
@@ -302,7 +337,7 @@ public class MainActivity extends ActionBarActivity {
                     String readMessage = new String(readBuf, 0, msg.arg1);
                     Toast.makeText(getApplicationContext(), readMessage,
                             Toast.LENGTH_SHORT).show();
-                    spin();
+                    highSpin();
                     break;
                 case BluetoothConstants.MESSAGE_DEVICE_NAME:
                     // save the connected device's name

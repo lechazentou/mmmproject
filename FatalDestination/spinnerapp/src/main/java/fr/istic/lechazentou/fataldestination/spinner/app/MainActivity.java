@@ -44,8 +44,6 @@ public class MainActivity extends ActionBarActivity {
     private static final String TAG = "MainActivity";
 
     // Intent request codes
-    private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
-    private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
     private static final int REQUEST_ENABLE_BT = 3;
     /**
      * Name of the connected device
@@ -130,13 +128,13 @@ public class MainActivity extends ActionBarActivity {
     public void onStart() {
         super.onStart();
         // If BT is not on, request that it be enabled.
-        // setupChat() will then be called during onActivityResult
+        // setup() will then be called during onActivityResult
         if (!mBluetoothAdapter.isEnabled()) {
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
             // Otherwise, setup the chat session
         } else if (bluetoothService == null) {
-            setupChat();
+            setup();
         }
     }
 
@@ -232,8 +230,8 @@ public class MainActivity extends ActionBarActivity {
     /**
      * Set up the UI and background operations for chat.
      */
-    private void setupChat() {
-        Log.d(TAG, "setupChat()");
+    private void setup() {
+        Log.d(TAG, "setup()");
 
         // Initialize the BluetoothChatService to perform bluetooth connections
         bluetoothService = new BluetoothService(this.getApplicationContext(), mHandler);
@@ -288,7 +286,6 @@ public class MainActivity extends ActionBarActivity {
                     switch (msg.arg1) {
                         case BluetoothService.STATE_CONNECTED:
                             setStatus(getString(R.string.title_connected_to, connectedDeviceName));
-                            //mConversationArrayAdapter.clear();
                             break;
                         case BluetoothService.STATE_CONNECTING:
                             setStatus(R.string.title_connecting);
@@ -299,16 +296,6 @@ public class MainActivity extends ActionBarActivity {
                             break;
                     }
                     break;
-                case BluetoothConstants.MESSAGE_WRITE:
-                    byte[] writeBuf = (byte[]) msg.obj;
-                    // construct a string from the buffer
-                    String writeMessage = new String(writeBuf);
-
-                    Toast.makeText(getApplicationContext(), writeMessage,
-                            Toast.LENGTH_SHORT).show();
-
-                    //mConversationArrayAdapter.add("Me:  " + writeMessage);
-                    break;
                 case BluetoothConstants.MESSAGE_READ:
                     byte[] readBuf = (byte[]) msg.obj;
                     // construct a string from the valid bytes in the buffer
@@ -316,7 +303,6 @@ public class MainActivity extends ActionBarActivity {
                     Toast.makeText(getApplicationContext(), readMessage,
                             Toast.LENGTH_SHORT).show();
                     spin();
-                    //mConversationArrayAdapter.add(connectedDeviceName + ":  " + readMessage);
                     break;
                 case BluetoothConstants.MESSAGE_DEVICE_NAME:
                     // save the connected device's name
@@ -336,23 +322,11 @@ public class MainActivity extends ActionBarActivity {
         super.onActivityResult(requestCode, resultCode, data);
         uiHelper.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
-            case REQUEST_CONNECT_DEVICE_SECURE:
-                // When DeviceListActivity returns with a device to connect
-                if (resultCode == Activity.RESULT_OK) {
-                    connectDevice(data, true);
-                }
-                break;
-            case REQUEST_CONNECT_DEVICE_INSECURE:
-                // When DeviceListActivity returns with a device to connect
-                if (resultCode == Activity.RESULT_OK) {
-                    connectDevice(data, false);
-                }
-                break;
             case REQUEST_ENABLE_BT:
                 // When the request to enable Bluetooth returns
                 if (resultCode == Activity.RESULT_OK) {
                     // Bluetooth is now enabled, so set up a chat session
-                    setupChat();
+                    setup();
                 } else {
                     // User did not enable Bluetooth or an error occurred
                     Log.d(TAG, "BT not enabled");
@@ -364,7 +338,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     /**
-     * Establish connection with other divice
+     * Establish connection with other device
      *
      * @param data   An {@link Intent} with {@link DeviceListActivity#EXTRA_DEVICE_ADDRESS} extra.
      * @param secure Socket Security type - Secure (true) , Insecure (false)

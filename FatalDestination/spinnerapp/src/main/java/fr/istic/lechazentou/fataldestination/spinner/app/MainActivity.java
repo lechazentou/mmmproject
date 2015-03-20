@@ -172,6 +172,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onResumeFragments() {
         super.onResumeFragments();
+
     }public void compatibleSpin() {
         if(Build.VERSION.SDK_INT >= 19)
             highSpin();
@@ -337,7 +338,7 @@ public class MainActivity extends ActionBarActivity {
                     String readMessage = new String(readBuf, 0, msg.arg1);
                     Toast.makeText(getApplicationContext(), readMessage,
                             Toast.LENGTH_SHORT).show();
-                    highSpin();
+                    compatibleSpin();
                     break;
                 case BluetoothConstants.MESSAGE_DEVICE_NAME:
                     // save the connected device's name

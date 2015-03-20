@@ -26,7 +26,7 @@ public class MapFragment extends com.google.android.gms.maps.MapFragment {
 
 
         canvas.drawBitmap(Bitmap.createScaledBitmap(image, 144, 144, true), 0, 0, color);
-        canvas.drawBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.marker), 0, 0, color);
+        canvas.drawBitmap(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.marker), 144, 166, true), 0, 0, color);
 
         getMap().addMarker(new MarkerOptions()
                 .position(new LatLng(latitude, longitude))
@@ -35,6 +35,6 @@ public class MapFragment extends com.google.android.gms.maps.MapFragment {
                 .title(text)).showInfoWindow();
         CameraPosition cameraPosition = new CameraPosition.Builder().target(new LatLng(latitude, longitude)).zoom(3.0f).build();
         CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
-        getMap().moveCamera(cameraUpdate);
+        getMap().animateCamera(cameraUpdate);
     }
 }

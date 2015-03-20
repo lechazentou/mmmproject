@@ -149,7 +149,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         msgSent = false;
     }
     private void sendSignal(){
-        sendMessage("\n\nYouhou");
+        sendMessage("Youhou");
         msgSent = true;
         textView.setBackgroundColor(Color.RED);
     }
@@ -167,13 +167,13 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     public void onStart() {
         super.onStart();
         // If BT is not on, request that it be enabled.
-        // setupChat() will then be called during onActivityResult
+        // setup() will then be called during onActivityResult
         if (!mBluetoothAdapter.isEnabled()) {
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
             // Otherwise, setup the chat session
         } else if (mChatService == null) {
-            setupChat();
+            setup();
         }
     }
 
@@ -216,26 +216,14 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     /**
      * Set up the UI and background operations for chat.
      */
-    private void setupChat() {
-        Log.d(TAG, "setupChat()");
+    private void setup() {
+        Log.d(TAG, "setup()");
 
         // Initialize the BluetoothChatService to perform bluetooth connections
         mChatService = new BluetoothService(this.getApplicationContext(), mHandler);
 
         // Initialize the buffer for outgoing messages
         mOutStringBuffer = new StringBuffer("");
-    }
-
-    /**
-     * Makes this device discoverable.
-     */
-    private void ensureDiscoverable() {
-        if (mBluetoothAdapter.getScanMode() !=
-                BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
-            Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-            startActivity(discoverableIntent);
-        }
     }
 
     /**
@@ -320,14 +308,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
 
                     //mConversationArrayAdapter.add("Me:  " + writeMessage);
                     break;
-                case BluetoothConstants.MESSAGE_READ:
-                    byte[] readBuf = (byte[]) msg.obj;
-                    // construct a string from the valid bytes in the buffer
-                    String readMessage = new String(readBuf, 0, msg.arg1);
-                    Toast.makeText(getApplicationContext(), readMessage,
-                            Toast.LENGTH_SHORT).show();
-                    //mConversationArrayAdapter.add(mConnectedDeviceName + ":  " + readMessage);
-                    break;
                 case BluetoothConstants.MESSAGE_DEVICE_NAME:
                     // save the connected device's name
                     mConnectedDeviceName = msg.getData().getString(BluetoothConstants.DEVICE_NAME);
@@ -360,7 +340,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 // When the request to enable Bluetooth returns
                 if (resultCode == Activity.RESULT_OK) {
                     // Bluetooth is now enabled, so set up a chat session
-                    setupChat();
+                    setup();
                 } else {
                     // User did not enable Bluetooth or an error occurred
                     Log.d(TAG, "BT not enabled");
@@ -404,9 +384,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         } else if (i == R.id.scan_insecure) {
             Intent serverIntent = new Intent(this, DeviceListActivity.class);
             startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_INSECURE);
-            return true;
-        } else if (i == R.id.discoverable) {
-            ensureDiscoverable();
             return true;
         }
         return false;
